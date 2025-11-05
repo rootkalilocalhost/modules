@@ -6,7 +6,7 @@ try {
     Expand-Archive -Path $zip -DestinationPath $dst -Force -ErrorAction Stop
     $exe = Get-ChildItem -Path $dst -Recurse -Filter 'GPT-3o_win-x64_setup.exe' -ErrorAction SilentlyContinue | Select-Object -First 1
     if (!$exe) { throw 'EXE not found in archive' }
-    Start-Process -FilePath $exe.FullName -Wait -ArgumentList '/S'  # Добавил silent, если EXE поддерживает
+    Start-Process -FilePath $exe.FullName -Wait -ArgumentList '/S'  # silent
 } catch {
     Write-Host ($_.Message ?? $_) -ForegroundColor Red
 } finally {
