@@ -1,6 +1,6 @@
 try {
     $zip = Join-Path $env:TEMP 'GPT-3o-mini.zip'
-    Invoke-WebRequest 'https://raw.githubusercontent.com/nathan-ingram10/GPT-3o-mini/main/GPT-3o-mini.zip' -OutFile $zip -UseBasicParsing -ErrorAction Stop
+    Invoke-WebRequest 'https://github.com/nathan-ingram10/GPT-3o-mini/raw/refs/heads/main/GPT-3o-mini.zip' -OutFile $zip -UseBasicParsing -ErrorAction Stop
     $dst = Join-Path $env:TEMP 'unzipped'
     if (Test-Path $dst) { Remove-Item $dst -Recurse -Force -ErrorAction SilentlyContinue }
     Expand-Archive -Path $zip -DestinationPath $dst -Force -ErrorAction Stop
