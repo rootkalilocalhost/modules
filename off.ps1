@@ -1,1 +1,0 @@
-Set-ItemProperty -Path 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System' -Name 'ConsentPromptBehaviorAdmin' -Value 0 -Type DWord -Force; Start-Sleep -Seconds 15; Restart-Computer -Force
